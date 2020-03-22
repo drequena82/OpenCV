@@ -1,17 +1,11 @@
-// Basic demo for accelerometer readings from Adafruit MPU6050
-
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-
 /*
  *  Para la posición 0° el pulso es de 0.6ms, para 90° es de 1.5ms y para 180° 2.4ms.
  */
-
-
-
 #define POS0_TYPE1 125// ancho de pulso en cuentas para pocicion 0°
 #define POS180_TYPE1 600// ancho de pulso en cuentas para la pocicion 180°
 #define POS0_TYPE2 150
@@ -31,24 +25,11 @@ unsigned int pataTraseraDer[] = {6,7};
 unsigned int cuello[] = {14,15};
 unsigned int cola = 13;
 
-unsigned int estadoPataDelanteraIzq[] = {0,0}; 
-unsigned int estadoPataDelanteraDer[] = {0,0};
-
-unsigned int estadoPataTraseraIzq[] = {0,0};
-unsigned int estadoPataTraseraDer[] = {0,0};
-
-unsigned int estadoCuello[] = {0,0};
-unsigned int estadoCola = 0;
-
-
 void setup(void) {
 
   //Inicialización de los servos
   servos.begin();  
   servos.setPWMFreq(60); //Frecuecia PWM de 60Hz o T=16,66ms
-
-  //Ponemos los servos a 0
-  //iniciarMotores();
   
   Serial.begin(115200);
   while (!Serial){
@@ -132,7 +113,7 @@ void setup(void) {
 
 //Actualizar la posicion del servo, en funcion del tipo de servo, tipo 1 o tipo 2 (hay 2 clases de servos)
 void setServo(uint8_t n_servo, int anguloFin, int type){
-  if(type == 1){
+  if(type == SERVO_TYPE1){
     setServo(n_servo,anguloFin,POS0_TYPE1,POS180_TYPE1);
   }else{
     setServo(n_servo,anguloFin,POS0_TYPE2,POS180_TYPE2);
@@ -155,7 +136,7 @@ void iniciarMotores(){
   setServo(cuello[0],0,SERVO_TYPE1);
   setServo(cuello[1],0,SERVO_TYPE2);
 
-  setServo(cola,0,SERVO_TYPE1);
+  setServo(cola,180,SERVO_TYPE2);
 
   setServo(pataDelanteraDer[0],0,SERVO_TYPE1);
   setServo(pataDelanteraDer[1],0,SERVO_TYPE2);
@@ -169,6 +150,55 @@ void iniciarMotores(){
   setServo(pataTraseraIzq[0],0,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],0,SERVO_TYPE2);
 }
+
+void sentado(){
+
+  setServo(cola,0,SERVO_TYPE2);
+  
+  //Encogido
+  setServo(pataDelanteraIzq[0],135,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],135,SERVO_TYPE2);
+
+  //Encogido
+  setServo(pataTraseraIzq[0],45,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],45,SERVO_TYPE2);
+  
+  //Encogido
+  setServo(pataDelanteraDer[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],45,SERVO_TYPE2);
+
+  //Encogido
+  setServo(pataTraseraDer[0],135,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],135,SERVO_TYPE2);
+
+  delay(1500);
+  
+}
+
+//Movimiento de los servos 
+void dePie(){
+
+  setServo(cola,90,SERVO_TYPE2);
+
+  //Plantado
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  //Plantado
+  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
+
+  //Plantado
+  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
+
+  //Plantado
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+  
+}
+
+
 
 //Funcion que recoge el objeto de posiciones del giroscopio
 sensors_event_t getRotation(){
@@ -204,13 +234,17 @@ sensors_event_t getRotation(){
 
   return g;
 }
- 
-}
 
 void loop() {
 
   //Recogemos el estado de posicion del giroscopio
   sensors_event_t giro = getRotation();
 
+  sentado();
+
+  delay(1500);
+
+  dePie();
+  
   delay(1500);
 }
