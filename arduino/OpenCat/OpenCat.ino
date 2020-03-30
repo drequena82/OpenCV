@@ -108,6 +108,9 @@ void setup(void) {
   }
 
   Serial.println("");
+
+  iniciarMotores();
+  
   delay(100);
 }
 
@@ -128,77 +131,80 @@ void setServo(int n_servo, int anguloFin,int pos0,int pos180) {
   servos.setPWM(n_servo, 0, dutyFin);  
 }
 
+/*
+cola                      <- cola a la izquierda 0 grados, centro 90 grados, derecha 180 grados
+pata delantera izquierda  <- posicion inicial 0 grados
+pata trasera izquierda    <- posicion inicial 180 grados
+pata delantera derecha    <- posicion inicial 180 grados
+pata trasera derecha      <- posicion inicial 0 grados
+*/
+
+
 //Inicializa los servos a la posicion 0
 void iniciarMotores(){
-  
-  //Inicializar los motores
-  
-  setServo(cuello[0],0,SERVO_TYPE1);
-  setServo(cuello[1],0,SERVO_TYPE2);
-
-  setServo(cola,180,SERVO_TYPE2);
-
-  setServo(pataDelanteraDer[0],0,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],0,SERVO_TYPE2);
-
+  setServo(cola,0,SERVO_TYPE2);
   setServo(pataDelanteraIzq[0],0,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
-
+  setServo(pataTraseraIzq[0],180,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],180,SERVO_TYPE2);
+  setServo(pataDelanteraDer[0],180,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],180,SERVO_TYPE2);
   setServo(pataTraseraDer[0],0,SERVO_TYPE1);
   setServo(pataTraseraDer[1],0,SERVO_TYPE2);
-
-  setServo(pataTraseraIzq[0],0,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],0,SERVO_TYPE2);
 }
 
+//Sentados
 void sentado(){
-
   setServo(cola,0,SERVO_TYPE2);
-  
-  //Encogido
   setServo(pataDelanteraIzq[0],135,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],135,SERVO_TYPE2);
-
-  //Encogido
   setServo(pataTraseraIzq[0],45,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],45,SERVO_TYPE2);
-  
-  //Encogido
   setServo(pataDelanteraDer[0],45,SERVO_TYPE1);
   setServo(pataDelanteraDer[1],45,SERVO_TYPE2);
-
-  //Encogido
   setServo(pataTraseraDer[0],135,SERVO_TYPE1);
   setServo(pataTraseraDer[1],135,SERVO_TYPE2);
-
-  delay(1500);
-  
 }
 
 //Movimiento de los servos 
-void dePie(){
-
+void plantado(){
   setServo(cola,90,SERVO_TYPE2);
-
-  //Plantado
-  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
-
-  //Plantado
-  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
-
-  //Plantado
-  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
-
-  //Plantado
-  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
-  
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
+  setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],90,SERVO_TYPE2);
+  setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],90,SERVO_TYPE2);
+  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],90,SERVO_TYPE2);
 }
 
 
+//Para caminar
+void marchaIzquierda(){
+  setServo(cola,70,SERVO_TYPE2);
+  setServo(pataDelanteraIzq[0],60,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],60,SERVO_TYPE2);
+  setServo(pataTraseraIzq[0],120,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],120,SERVO_TYPE2);
+  setServo(pataDelanteraDer[0],60,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],60,SERVO_TYPE2);
+  setServo(pataTraseraDer[0],120,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],120,SERVO_TYPE2);
+}
+
+//Para caminar
+void marchaDerecha(){
+  setServo(cola,110,SERVO_TYPE2);
+  setServo(pataDelanteraIzq[0],120,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],120,SERVO_TYPE2);
+  setServo(pataTraseraIzq[0],60,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],60,SERVO_TYPE2);
+  setServo(pataDelanteraDer[0],120,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],120,SERVO_TYPE2);
+  setServo(pataTraseraDer[0],60,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],60,SERVO_TYPE2);
+}
 
 //Funcion que recoge el objeto de posiciones del giroscopio
 sensors_event_t getRotation(){
@@ -210,6 +216,7 @@ sensors_event_t getRotation(){
   mpu.getEvent(&a, &g, &temp);
 
   /* Print out the values */
+  /*
   Serial.print("Acceleration X: ");
   Serial.print(a.acceleration.x);
   Serial.print(", Y: ");
@@ -217,7 +224,7 @@ sensors_event_t getRotation(){
   Serial.print(", Z: ");
   Serial.print(a.acceleration.z);
   Serial.println(" m/s^2");
-
+  */
   Serial.print("Rotation X: ");
   Serial.print(g.gyro.x);
   Serial.print(", Y: ");
@@ -236,14 +243,13 @@ sensors_event_t getRotation(){
 }
 
 void loop() {
-
   //Recogemos el estado de posicion del giroscopio
   sensors_event_t giro = getRotation();
-
-  sentado();
+  
+  //sentado();
 
   delay(1500);
-
+  
   dePie();
   
   delay(1500);
