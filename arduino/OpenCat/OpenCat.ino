@@ -250,7 +250,7 @@ void loop() {
 
   delay(1500);
   
-  dePie();
+  plantado();
   
   delay(1500);
 }
