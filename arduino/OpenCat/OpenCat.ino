@@ -246,8 +246,6 @@ void loop() {
       plantado();
     }
   }
-
-  plantado();
   
   delay(2000);
 
