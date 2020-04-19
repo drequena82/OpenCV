@@ -2,6 +2,15 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+#define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 /*
  *  Para la posición 0° el pulso es de 0.6ms, para 90° es de 1.5ms y para 180° 2.4ms.
@@ -25,6 +34,8 @@ unsigned int pataTraseraDer[] = {6,7};
 unsigned int cuello[] = {14,15};
 unsigned int cola = 13;
 
+long distancia = 0;
+
 sensors_event_t giro;
 
 const int trigger = 2;   //Pin digital 2 para el Trigger del sensor
@@ -32,6 +43,16 @@ const int echo = 3;   //Pin digital 3 para el Echo del sensor
 
 void setup(void) {
 
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
+  // Show initial display buffer contents on the screen --
+  // the library initializes this with an Adafruit splash screen.
+  display.display();
+  
   //Incializacion del sensor de ultrasonido
   pinMode(trigger, OUTPUT); //pin como salida
   pinMode(echo, INPUT);  //pin como entrada
@@ -101,84 +122,129 @@ void iniciarMotores(){
   giro = getRotation();
   
   setServo(cola,0,SERVO_TYPE2);
+  
   setServo(pataDelanteraIzq[0],0,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
+  
   setServo(pataTraseraIzq[0],180,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],180,SERVO_TYPE2);
+  
   setServo(pataDelanteraDer[0],180,SERVO_TYPE1);
   setServo(pataDelanteraDer[1],180,SERVO_TYPE2);
+  
   setServo(pataTraseraDer[0],0,SERVO_TYPE1);
   setServo(pataTraseraDer[1],0,SERVO_TYPE2);
 }
 
-//Sentados
+//Para caminar
+void caminar(){
+  
+  //Pata delantera izq encogidas
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],90,SERVO_TYPE2);
+  
+  delay(500);
+
+  //Pata delantera der encogidas
+  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
+
+  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
+  
+  delay(1000);
+
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+
+  delay(500);
+  
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],90,SERVO_TYPE2);
+
+  delay(1000);
+}
+
+//Trote
+void trote(){
+  
+  //Pata delantera izq encogidas
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+  
+  delay(500);
+
+  //Pata delantera der encogidas
+  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
+
+  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
+  
+  delay(1000);
+
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+
+  delay(500);
+  
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+
+  delay(1000);
+}
+
+//Sentado
 void sentado(){
-  giro = getRotation();
   
   setServo(cola,0,SERVO_TYPE2);
-  setServo(pataDelanteraIzq[0],135,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],140,SERVO_TYPE2);
   
   setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],45,SERVO_TYPE2);
+  setServo(pataTraseraIzq[1],50,SERVO_TYPE2);
   
-  setServo(pataDelanteraDer[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],180,SERVO_TYPE2);
+  setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],50,SERVO_TYPE2);
   
   setServo(pataTraseraDer[0],90,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],135,SERVO_TYPE2);
+  setServo(pataTraseraDer[1],140,SERVO_TYPE2);
 }
 
 //Movimiento de los servos 
 void plantado(){
-  giro = getRotation();
   
   setServo(cola,90,SERVO_TYPE2);
+  
   setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
+  
   setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],90,SERVO_TYPE2);
+  
   setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
   setServo(pataDelanteraDer[1],90,SERVO_TYPE2);
+  
   setServo(pataTraseraDer[0],90,SERVO_TYPE1);
   setServo(pataTraseraDer[1],90,SERVO_TYPE2);
-}
-
-
-//Para caminar
-void marchaIzquierda(){
-  giro = getRotation();
-  
-  setServo(cola,70,SERVO_TYPE2);
-  setServo(pataDelanteraIzq[0],60,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],60,SERVO_TYPE2);
-  setServo(pataTraseraIzq[0],60,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],60,SERVO_TYPE2);
-
-  delay(100);
-  
-  setServo(pataDelanteraDer[0],60,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],60,SERVO_TYPE2);
-  setServo(pataTraseraDer[0],60,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],60,SERVO_TYPE2);
-}
-
-//Para caminar
-void marchaDerecha(){
-  giro = getRotation();
-  
-  setServo(cola,110,SERVO_TYPE2);
-  setServo(pataDelanteraIzq[0],120,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],120,SERVO_TYPE2);
-  setServo(pataTraseraIzq[0],120,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],120,SERVO_TYPE2);
-
-  delay(100);
-  
-  setServo(pataDelanteraDer[0],120,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],120,SERVO_TYPE2);
-  setServo(pataTraseraDer[0],120,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],120,SERVO_TYPE2);
 }
 
 //Funcion que recoge el objeto de posiciones del giroscopio
@@ -190,32 +256,40 @@ sensors_event_t getRotation(){
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(a.acceleration.x);
-  Serial.print(", Y: ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", Z: ");
-  Serial.print(a.acceleration.z);
-  Serial.println(" m/s^2");
+  //Escribimos en el display
+  display.clearDisplay();
+  display.setTextSize(1);               // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE);  // Draw white text
+  display.setCursor(0,0);               // Start at top-left corner
+  display.print("acc x: ");
+  display.print(g.acceleration.x);
+  display.print(" - ");
+  display.print("acc y: ");
+  display.print(g.acceleration.y);
+  display.print(" - ");
+  display.print("acc z: ");
+  display.print(g.acceleration.z);
+  display.println("");
   
-  Serial.print("Rotation X: ");
-  Serial.print(g.gyro.x);
-  Serial.print(", Y: ");
-  Serial.print(g.gyro.y);
-  Serial.print(", Z: ");
-  Serial.print(g.gyro.z);
-  Serial.println(" deg/s");
+  display.print("x: ");
+  display.print(g.gyro.x);
+  display.print(" - ");
+  display.print("y: ");
+  display.print(g.gyro.y);
+  display.print(" - ");
+  display.print("z: ");
+  display.print(g.gyro.z);
+  display.print(" - ");
+  display.print("temp: ");
+  display.print(temp.temperature);
 
-  Serial.print("Temperature: ");
-  Serial.print(temp.temperature);
-  Serial.println(" degC");
-
-  Serial.println("");
-
+  display.startscrollright(0x00, 0x0F);
+  delay(1000);
+  
   return g;
 }
 
+//Función que mide la distancia medida por el sensor de ultrasonido.
 long getDistancia(){
   long t; //timepo que demora en llegar el eco
   long d; //distancia en centimetros
@@ -236,17 +310,32 @@ long getDistancia(){
 
 void loop() {
   //Va a caminar hasta que llegue a 15 cm de un objeto.
+  distancia = getDistancia();
+  
+  sentado();
+  
+  delay(2000);
+
+  getRotation();
+  
   for(int i=0;i<10;i++){
-    if(getDistancia() > 15){
-      marchaIzquierda();
-      delay(500);
-      marchaDerecha();
-      delay(500);
+    getRotation();
+    if(distancia > 15){
+      caminar();
     }else{
       plantado();
     }
   }
-  
-  delay(2000);
+
+  plantado();
+
+  for(int i=0;i<10;i++){
+    getRotation();
+    if(distancia > 15){
+      trote();
+    }else{
+      plantado();
+    }
+  }
 
 }
