@@ -43,6 +43,11 @@ const int echo = 3;   //Pin digital 3 para el Echo del sensor
 
 void setup(void) {
 
+  Serial.begin(115200);
+  
+  while (!Serial){
+    delay(10); // will pause Zero, Leonardo, etc until serial console opens
+  } 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     Serial.println(F("SSD1306 allocation failed"));
@@ -61,11 +66,6 @@ void setup(void) {
   //Inicialización de los servos
   servos.begin();  
   servos.setPWMFreq(60); //Frecuecia PWM de 60Hz o T=16,66ms
-  
-  Serial.begin(115200);
-  while (!Serial){
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
-  }
   
   // Try to initialize!
   if (!mpu.begin()) {
@@ -86,7 +86,7 @@ void setup(void) {
   
   delay(1000);
 
-  sentado();
+  plantado();
 
   delay(1000);
 }
@@ -119,7 +119,7 @@ pata trasera derecha      <- posicion inicial 0 grados
 
 //Inicializa los servos a la posicion 0
 void iniciarMotores(){
-  giro = getRotation();
+  giro = getRotation(distancia);
   
   setServo(cola,0,SERVO_TYPE2);
   
@@ -146,7 +146,7 @@ void caminar(){
   setServo(pataTraseraDer[0],90,SERVO_TYPE1);
   setServo(pataTraseraDer[1],90,SERVO_TYPE2);
   
-  delay(500);
+  delay(200);
 
   //Pata delantera der encogidas
   setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
@@ -155,7 +155,7 @@ void caminar(){
   setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
   
-  delay(1000);
+  delay(200);
 
   setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
@@ -163,7 +163,7 @@ void caminar(){
   setServo(pataTraseraDer[0],45,SERVO_TYPE1);
   setServo(pataTraseraDer[1],45,SERVO_TYPE2);
 
-  delay(500);
+  delay(200);
   
   setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
@@ -171,7 +171,7 @@ void caminar(){
   setServo(pataTraseraDer[0],90,SERVO_TYPE1);
   setServo(pataTraseraDer[1],90,SERVO_TYPE2);
 
-  delay(1000);
+  delay(200);
 }
 
 //Trote
@@ -193,7 +193,7 @@ void trote(){
   setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
   setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
   
-  delay(1000);
+  delay(500);
 
   setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
@@ -209,7 +209,7 @@ void trote(){
   setServo(pataTraseraDer[0],45,SERVO_TYPE1);
   setServo(pataTraseraDer[1],45,SERVO_TYPE2);
 
-  delay(1000);
+  delay(500);
 }
 
 //Sentado
@@ -248,7 +248,7 @@ void plantado(){
 }
 
 //Funcion que recoge el objeto de posiciones del giroscopio
-sensors_event_t getRotation(){
+sensors_event_t getRotation(long distancia){
    /* Take a new reading */
   mpu.read();
 
@@ -261,31 +261,41 @@ sensors_event_t getRotation(){
   display.setTextSize(1);               // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);  // Draw white text
   display.setCursor(0,0);               // Start at top-left corner
-  display.print("acc x: ");
-  display.print(g.acceleration.x);
-  display.print(" - ");
-  display.print("acc y: ");
-  display.print(g.acceleration.y);
-  display.print(" - ");
-  display.print("acc z: ");
-  display.print(g.acceleration.z);
+  
+  display.print("tmp: ");
+  display.print(temp.temperature);
+  display.print("ºC cm: ");
+  display.print(distancia);
+  
+  display.println("");
+
+  display.print("xg: ");
+  display.print(g.gyro.x);
+  display.print(" xa: ");
+  display.print(a.acceleration.x);
   display.println("");
   
-  display.print("x: ");
-  display.print(g.gyro.x);
-  display.print(" - ");
-  display.print("y: ");
+  display.print("yg: ");
   display.print(g.gyro.y);
-  display.print(" - ");
-  display.print("z: ");
-  display.print(g.gyro.z);
-  display.print(" - ");
-  display.print("temp: ");
-  display.print(temp.temperature);
-
-  display.startscrollright(0x00, 0x0F);
-  delay(1000);
+  display.print(" ya: ");
+  display.print(a.acceleration.y);
   
+  display.println("");
+  
+  display.print("zg: ");
+  display.print(g.gyro.z);
+  display.print(" za: ");
+  display.print(a.acceleration.z);
+  
+  display.println("");
+  
+  
+  //display.startscrollright(0x00, 0x0F);
+  display.display();
+  
+  delay(200);
+  
+  //display.stopscroll();
   return g;
 }
 
@@ -311,7 +321,12 @@ long getDistancia(){
 void loop() {
   //Va a caminar hasta que llegue a 15 cm de un objeto.
   distancia = getDistancia();
+
+  getRotation(distancia);
+
+  //trote();
   
+  /*
   sentado();
   
   delay(2000);
@@ -337,5 +352,5 @@ void loop() {
       plantado();
     }
   }
-
+  */
 }
