@@ -4,12 +4,10 @@
 #include <LiquidCrystal_I2C.h>
 
 #include "AHT10.h"
-#include "config.h"  // Sustituir con datos de vuestra red
 #include "Server.hpp"
-#include "ESP8266_Utils.hpp"
-
 #define TIMER_BOMBA 10000
 #define UMBRAL_HUM 20
+#define TIMER_LCD 10000
 
 LiquidCrystal_I2C lcd(0x3F,16,2);
 AHT10 sensorTemp(AHT10_ADDRESS_0X38);
@@ -18,29 +16,38 @@ int readStatus = 0;
 int sensorValue = 0;
 int timer = 0;
 int humidity = 0;
+long timeIni = 0;
+long timeFin = 0;
+long timeButton = 0;
 
 void setup(void) 
 {
   Serial.begin(115200);
   
   pinMode(D8,OUTPUT);
-    
-   // Inicializar el LCD
+  pinMode(D11,OUTPUT);
+  pinMode(D10,INPUT);
+
+  digitalWrite(D11,HIGH);
   lcd.init();
   
-  //Encender la luz de fondo.b
-  lcd.backlight();
-
+   // Inicializar el LCD
+  activateDisplay();
+  
   // Show initial display buffer contents on the screen --
   // the library initializes this with an Adafruit splash screen.
   while (sensorTemp.begin() != true)
   {
     showText("Inicializando",0,1);
   }
+
+  showText("Conectando...",0,1);
   
-  ConnectWiFi_STA();
- 
-  InitServer();
+  connectWiFi_STA;
+  initServer();
+  showText("Conectado !!",0,1);
+  
+  desactivateDisplay();
 }
  
 void loop()
@@ -51,14 +58,21 @@ void loop()
    sensorValue = analogRead(A0);   
    humidity=map(sensorValue,0,1024,100, 0);
 
-  
+   if(digitalRead(D10) == HIGH){
+      timeButton = millis();
+      activateDisplay(); 
+      Serial.println("Boton pulsado");
+   }
+   
    Serial.print("Humedad suelo: ");
    Serial.print(humidity);
    Serial.print(" % ");
    Serial.println(sensorValue);
-
+  
   if(humidity < UMBRAL_HUM && timer == 0){
-
+    
+    activateDisplay();
+    
     textoBomba = "Hum. baja " + String(humidity) + "%";
     //activamos el motor de la bomba 10 segundos
     showText(textoBomba,0,1);
@@ -85,14 +99,20 @@ void loop()
       delay(1000);
     }
   }else{   
-   if (readStatus != AHT10_ERROR){
-    showSensor(sensorTemp.readTemperature(AHT10_USE_READ_DATA),sensorTemp.readHumidity(AHT10_USE_READ_DATA));
-   }else{
-    showText("Se ha perdido la conexión con los sensores",0,1);
-   }
+    if(timeButton + TIMER_LCD > millis()){
+      if (readStatus != AHT10_ERROR){
+        showSensor(sensorTemp.readTemperature(AHT10_USE_READ_DATA),sensorTemp.readHumidity(AHT10_USE_READ_DATA));
+      }else{
+        showText("Se ha perdido la conexión con los sensores",0,1);
+      }
+    }else{
+      timeButton=0;
+      desactivateDisplay();
+    }
   }
-   sensorValues(sensorTemp.readTemperature(AHT10_USE_READ_DATA),sensorTemp.readHumidity(AHT10_USE_READ_DATA),humidity,timer);
-   server.handleClient();
+  
+  sensorValues(sensorTemp.readTemperature(AHT10_USE_READ_DATA),sensorTemp.readHumidity(AHT10_USE_READ_DATA),humidity,timer);
+  server.handleClient();
 }
 
 void showText(String text,int linea,int clear){
@@ -120,4 +140,22 @@ void showSensor(float temp,float hum){
   lcd.print("H: ");
   lcd.print(hum);
   lcd.print(" +-2 %");
+}
+
+void activateBackLight(){
+  lcd.backlight();  
+}
+
+void desactivateBackLight(){
+  lcd.noBacklight();  
+}
+
+void activateDisplay(){
+  lcd.display();
+  lcd.backlight();  
+}
+
+void desactivateDisplay(){
+  lcd.noDisplay();  
+  lcd.noBacklight();
 }
