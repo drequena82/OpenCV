@@ -1,4 +1,5 @@
-<html>
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="vendor/bootstrap.min.css">
@@ -13,8 +14,8 @@
             padding: 1%
         }
     </style>
-    <div id="contenedor" class="main-container">
-        <h2>Configuración del riego automático ESP8366</h2>
+    <div id="contenedor" class="container-fluid">
+        <h2>Configuración del riego automático ESP8266</h2>
         <hr/>
         <form id="formRegadera">
             <div class="form-group">
@@ -28,10 +29,10 @@
                     <div id="moisture" class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"><span id="moisture2"></span></div>
                 </div>
                 <br>
-                <label for="formControlRange">Umbral de regado <span id="labelUmbral"></span> %</label>
-                <input type="range" class="form-control-range" id="rangoUmbral" name="rangoUmbral"min="1" max="100">
+                <label for="formControlRange">Umbral de riego <span id="labelUmbral"></span> %</label>
+                <input type="range" class="form-control-range" id="rangoUmbral" name="rangoUmbral" min="1" max="100">
                 <br>
-                <label for="formControlRange">Tiempo de regado (<span id="labelTiempo"></span> segundos)</label>
+                <label for="formControlRange">Tiempo de riego (<span id="labelTiempo"></span> segundos)</label>
                 <input type="range" class="form-control-range" id="rangoTiempo" name="rangoTiempo" min="1" max="10">
                 <br>
                 <div class="custom-control custom-switch">
@@ -66,7 +67,7 @@
             data: "",
             contentType: "application/json",
             dataType: "text",
-            success: function(result,status,xhr) {
+            success: function(result, status, xhr) {
                 let data = null;
                 if (null != result) {
                     data = JSON.parse(result);
@@ -75,20 +76,23 @@
                     $("#humidity").html(data.humidity);
                     $("#moisture2").html(data.moisture);
                     $("#moisture").attr('aria-valuenow', data.moisture);
-                    if(data.switch == 1){
-                        $('#switch').attr('checked','true');
-                    }else{
-                        $('#switch').attr('checked','false');
+                    $('#moisture').css('width', data.moisture + '%');
+
+                    if (data.switch == 1) {
+                        $('#switch').attr('checked', 'true');
+                    } else {
+                        $('#switch').attr('checked', 'false');
                     }
                     $('#rangoUmbral').val(data.umbral);
-                    $('#rangoTiempo').val(data.tiempo/1000);
+                    $('#rangoTiempo').val(data.tiempo / 1000);
                     $('#labelUmbral').html(data.umbral);
-                    $('#labelTiempo').html(data.tiempo/1000);
+                    $('#labelTiempo').html(data.tiempo / 1000);
                 } else {
                     $("#temperature").html("NA");
                     $("#humidity").html("NA");
                     $("#moisture2").html("NA");
                     $("#moisture").attr('aria-valuenow', "0");
+                    $('#moisture').css('width', '0%');
                     $('#switch').val(0);
                     $('#rangoUmbral').val(0);
                     $('#rangoTiempo').val(0);
@@ -101,7 +105,7 @@
                 console.log(xhr);
                 */
             },
-            error: function(xhr,status,error) {
+            error: function(xhr, status, error) {
                 console.log(xhr);
                 console.log(status);
                 console.log(error);
@@ -110,6 +114,7 @@
                 $("#humidity").html("NA");
                 $("#moisture2").html("NA");
                 $("#moisture").attr('aria-valuenow', "0");
+                $('#moisture').css('width', '0%');
                 $('#switch').val(0);
                 $('#rangoUmbral').val(0);
                 $('#rangoTiempo').val(0);
@@ -118,7 +123,7 @@
             }
         });
     }
-    
+
     function regar() {
         $.ajax({
             type: "get",
@@ -150,11 +155,11 @@
     }
     $(document).ready(function(e) {
         loadAjax();
-        $("#rangoUmbral").bind("change",function(e){
+        $("#rangoUmbral").bind("change", function(e) {
             $("#labelUmbral").html($("#rangoUmbral").val());
         });
 
-        $("#rangoTiempo").bind("change",function(e){
+        $("#rangoTiempo").bind("change", function(e) {
             $("#labelTiempo").html($("#rangoTiempo").val());
         });
     });
