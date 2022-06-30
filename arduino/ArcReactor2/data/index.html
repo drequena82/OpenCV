@@ -1,0 +1,130 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="vendor/bootstrap.min.css">
+    <title>
+        Arc Reactor Lamp
+    </title>
+</head>
+
+<body>
+    <style>
+        #contenedor {
+            padding: 1%
+        }
+    </style>
+    <div id="contenedor" class="container-fluid">
+        <h2>Activación del ARC Reactor</h2>
+        <hr/>
+        <form id="form">
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadio" id="flexRadio1" value='1'>
+                    <label class="form-check-label" for="flexRadioDefault1">
+                      Arranque fijo
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadio" id="flexRadio2"  value='2'>
+                    <label class="form-check-label" for="flexRadioDefault2">
+                      Arranque progresivo
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadio" id="flexRadio3"  value='3'>
+                    <label class="form-check-label" for="flexRadioDefault3">
+                      Arranque parpadeo
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadio" id="flexRadio4"  checked value='4'>
+                    <label class="form-check-label" for="flexRadioDefault4">
+                      Arranque parpadeo + progresivo
+                    </label>
+                </div>
+                <br>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheck">
+                    <label class="form-check-label" for="flexSwitchCheck">Activar ARC</label>
+                </div>
+                <br>
+
+                <button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Guardar los parámetros" onclick="javascript:guardar()">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+
+<script src="vendor/jquery-3.5.1.js"></script>
+<script src="vendor/popper.min.js"></script>
+<script src="vendor/bootstrap.min.js"></script>
+<script>
+    function loadAjax() {
+        $.ajax({
+            type: "get",
+            url: window.location.origin + "/state",
+            data: "",
+            contentType: "application/json",
+            dataType: "text",
+            success: function(result, status, xhr) {
+                let data = null;
+                if (null != result) {
+                    data = JSON.parse(result);
+                    console.log(data);
+                    if(data.status >= 0){
+                        $("#flexSwitchCheck").attr('checked','true');
+                        switch(data.status){
+                            case 0:
+                                $('#flexRadio1').attr('checked','true');
+                                break;
+                            case 1:
+                                $('#flexRadio2').attr('checked','true');
+                                break;
+                            case 2:
+                                $('#flexRadio3').attr('checked','true');
+                                break;
+                            case 3:
+                                $('#flexRadio4').attr('checked','true');
+                                break;
+                            default:
+                                $('#flexRadio4').attr('checked','true');
+                        }
+                    }else{
+                        $("#flexSwitchCheck").attr('checked','false');
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr);
+                console.log(status);
+                console.log(error);
+
+                $("#flexSwitchCheck").attr('checked','false');
+            }
+        });
+    }
+
+    function guardar() {
+        $.post({
+            url: window.location.origin + "/save",
+            data: $("#form").serialize(),
+            success: function(response) {
+                alert("Datos actualizados!!");
+            },
+            error: function(e) {
+                alert("Error al guardar");
+            }
+        });
+        loadAjax();
+    }
+
+    $(document).ready(function(e) {
+        loadAjax();
+    });
+
+</script>
+
+</html>

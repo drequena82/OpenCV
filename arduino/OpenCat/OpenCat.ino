@@ -84,11 +84,14 @@ void setup(void) {
   //Posiciones iniciales de los servos (patas estiradas totalmente).
   iniciarMotores();
   
-  delay(1000);
+  delay(2000);
 
   plantado();
 
-  delay(1000);
+}
+
+void loop() {
+  trote();
 }
 
 //Actualizar la posicion del servo, en funcion del tipo de servo, tipo 1 o tipo 2 (hay 2 clases de servos)
@@ -120,119 +123,12 @@ pata trasera derecha      <- posicion inicial 0 grados
 //Inicializa los servos a la posicion 0
 void iniciarMotores(){
   giro = getRotation(distancia);
-  
+
   setServo(cola,0,SERVO_TYPE2);
-  
-  setServo(pataDelanteraIzq[0],0,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
-  
-  setServo(pataTraseraIzq[0],180,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],180,SERVO_TYPE2);
-  
-  setServo(pataDelanteraDer[0],180,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],180,SERVO_TYPE2);
-  
-  setServo(pataTraseraDer[0],0,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],0,SERVO_TYPE2);
-}
 
-//Para caminar
-void caminar(){
-  
-  //Pata delantera izq encogidas
-  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
+  setServo(cuello[0],0,SERVO_TYPE1);
+  setServo(cuello[1],0,SERVO_TYPE2);
 
-  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],90,SERVO_TYPE2);
-  
-  delay(200);
-
-  //Pata delantera der encogidas
-  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
-
-  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
-  
-  delay(200);
-
-  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
-
-  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
-
-  delay(200);
-  
-  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
-
-  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],90,SERVO_TYPE2);
-
-  delay(200);
-}
-
-//Trote
-void trote(){
-  
-  //Pata delantera izq encogidas
-  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
-
-  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
-  
-  delay(500);
-
-  //Pata delantera der encogidas
-  setServo(pataDelanteraDer[0],135,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],135,SERVO_TYPE2);
-
-  setServo(pataTraseraIzq[0],135,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],135,SERVO_TYPE2);
-  
-  delay(500);
-
-  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
-
-  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
-
-  delay(500);
-  
-  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
-
-  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
-
-  delay(500);
-}
-
-//Sentado
-void sentado(){
-  
-  setServo(cola,0,SERVO_TYPE2);
-  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
-  setServo(pataDelanteraIzq[1],140,SERVO_TYPE2);
-  
-  setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
-  setServo(pataTraseraIzq[1],50,SERVO_TYPE2);
-  
-  setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
-  setServo(pataDelanteraDer[1],50,SERVO_TYPE2);
-  
-  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
-  setServo(pataTraseraDer[1],140,SERVO_TYPE2);
-}
-
-//Movimiento de los servos 
-void plantado(){
-  
-  setServo(cola,90,SERVO_TYPE2);
   
   setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
   setServo(pataDelanteraIzq[1],90,SERVO_TYPE2);
@@ -247,10 +143,114 @@ void plantado(){
   setServo(pataTraseraDer[1],90,SERVO_TYPE2);
 }
 
+//Trote
+void trote(){
+  
+  //Pata delantera izq encogidas
+  setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
+  setServo(pataTraseraDer[1],25,SERVO_TYPE2);
+
+  setServo(pataDelanteraDer[1],25,SERVO_TYPE2);
+  setServo(pataTraseraIzq[1],0,SERVO_TYPE2);
+  
+  delay(200);
+  
+  setServo(pataDelanteraIzq[0],25,SERVO_TYPE1);
+  setServo(pataTraseraDer[0],110,SERVO_TYPE1);
+
+  setServo(pataDelanteraDer[0],110,SERVO_TYPE1);
+  setServo(pataTraseraIzq[0],25,SERVO_TYPE1);
+
+  delay(500);
+
+  setServo(pataDelanteraIzq[1],25,SERVO_TYPE2);
+  setServo(pataTraseraDer[1],0,SERVO_TYPE2);
+
+  setServo(pataDelanteraDer[1],0,SERVO_TYPE2);
+  setServo(pataTraseraIzq[1],25,SERVO_TYPE2);
+  
+  delay(200);
+  
+  setServo(pataDelanteraIzq[0],110,SERVO_TYPE1);
+  setServo(pataTraseraDer[0],25,SERVO_TYPE1);
+
+  setServo(pataDelanteraDer[0],25,SERVO_TYPE1);
+  setServo(pataTraseraIzq[0],110,SERVO_TYPE1);
+  
+  delay(500);
+  
+  //setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  //setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+/*
+  delay(500);
+
+  //Pata delantera der encogidas
+  
+  
+
+  setServo(pataTraseraIzq[0],110,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],110,SERVO_TYPE2);
+  
+  delay(500);
+
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+
+  delay(500);
+  
+  setServo(pataDelanteraIzq[0],45,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],45,SERVO_TYPE2);
+
+  setServo(pataTraseraDer[0],45,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],45,SERVO_TYPE2);
+
+  delay(500);
+  */
+}
+
+//Sentado
+void sentado(){
+  
+  setServo(cola,0,SERVO_TYPE2);
+  
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],140,SERVO_TYPE2);
+  
+  setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],50,SERVO_TYPE2);
+  
+  setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],50,SERVO_TYPE2);
+  
+  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],140,SERVO_TYPE2);
+  
+}
+
+//Movimiento de los servos 
+void plantado(){
+  
+  setServo(pataDelanteraIzq[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraIzq[1],0,SERVO_TYPE2);
+  
+  setServo(pataTraseraIzq[0],90,SERVO_TYPE1);
+  setServo(pataTraseraIzq[1],180,SERVO_TYPE2);
+  
+  setServo(pataDelanteraDer[0],90,SERVO_TYPE1);
+  setServo(pataDelanteraDer[1],180,SERVO_TYPE2);
+  
+  setServo(pataTraseraDer[0],90,SERVO_TYPE1);
+  setServo(pataTraseraDer[1],0,SERVO_TYPE2);
+  
+}
+
 //Funcion que recoge el objeto de posiciones del giroscopio
 sensors_event_t getRotation(long distancia){
    /* Take a new reading */
-  mpu.read();
+  //mpu.read();
 
   /* Get new sensor events with the readings */
   sensors_event_t a, g, temp;
@@ -316,41 +316,4 @@ long getDistancia(){
   Serial.print("cm");
   Serial.println();
   delay(100);          //Hacemos una pausa de 100ms
-}
-
-void loop() {
-  //Va a caminar hasta que llegue a 15 cm de un objeto.
-  distancia = getDistancia();
-
-  getRotation(distancia);
-
-  //trote();
-  
-  /*
-  sentado();
-  
-  delay(2000);
-
-  getRotation();
-  
-  for(int i=0;i<10;i++){
-    getRotation();
-    if(distancia > 15){
-      caminar();
-    }else{
-      plantado();
-    }
-  }
-
-  plantado();
-
-  for(int i=0;i<10;i++){
-    getRotation();
-    if(distancia > 15){
-      trote();
-    }else{
-      plantado();
-    }
-  }
-  */
 }

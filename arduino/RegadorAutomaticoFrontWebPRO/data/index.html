@@ -1,0 +1,168 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="vendor/bootstrap.min.css">
+    <title>
+        Riego automático ESP8266
+    </title>
+</head>
+
+<body>
+    <style>
+        #contenedor {
+            padding: 1%
+        }
+    </style>
+    <div id="contenedor" class="container-fluid">
+        <h2>Configuración del riego automático ESP8266</h2>
+        <hr/>
+        <form id="formRegadera">
+            <div class="form-group">
+                <label>Temperatura:<span id="temperature"></span> ºC</label>
+                <br>
+                <label>Humedad:<span id="humidity" ></span> %</label>
+                <br>
+                <label>Humedad Suelo:</label>
+                <br>
+                <div class="progress">
+                    <div id="moisture" class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"><span id="moisture2"></span></div>
+                </div>
+                <br>
+                <label for="formControlRange">Umbral de riego <span id="labelUmbral"></span> %</label>
+                <input type="range" class="form-control-range" id="rangoUmbral" name="rangoUmbral" min="1" max="100">
+                <br>
+                <label for="formControlRange">Tiempo de riego (<span id="labelTiempo"></span> segundos)</label>
+                <input type="range" class="form-control-range" id="rangoTiempo" name="rangoTiempo" min="1" max="10">
+                <br>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="switch" name="switch">
+                    <label class="custom-control-label" for="switch">Activar/Desactivar dispositivo</label>
+                </div>
+                <br>
+
+                <button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Guardar los parámetros" onclick="javascript:guardar()">
+                    Guardar
+                </button>
+
+                <button type="button" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Regar ahora" onclick="javascript:regar()">
+                    Regar
+                </button>
+
+                <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Actualizar estado" onclick="javascript:loadAjax()">
+                    Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+<script src="vendor/jquery-3.5.1.js"></script>
+<script src="vendor/popper.min.js"></script>
+<script src="vendor/bootstrap.min.js"></script>
+<script>
+    function loadAjax() {
+        $.ajax({
+            type: "get",
+            url: window.location.origin + "/stateSensors",
+            data: "",
+            contentType: "application/json",
+            dataType: "text",
+            success: function(result, status, xhr) {
+                let data = null;
+                if (null != result) {
+                    data = JSON.parse(result);
+                    //console.log(data);
+                    $("#temperature").html(data.temperature);
+                    $("#humidity").html(data.humidity);
+                    $("#moisture2").html(data.moisture);
+                    $("#moisture").attr('aria-valuenow', data.moisture);
+                    $('#moisture').css('width', data.moisture + '%');
+
+                    if (data.switch == 1) {
+                        $('#switch').attr('checked', 'true');
+                    } else {
+                        $('#switch').attr('checked', 'false');
+                    }
+                    $('#rangoUmbral').val(data.umbral);
+                    $('#rangoTiempo').val(data.tiempo / 1000);
+                    $('#labelUmbral').html(data.umbral);
+                    $('#labelTiempo').html(data.tiempo / 1000);
+                } else {
+                    $("#temperature").html("NA");
+                    $("#humidity").html("NA");
+                    $("#moisture2").html("NA");
+                    $("#moisture").attr('aria-valuenow', "0");
+                    $('#moisture').css('width', '0%');
+                    $('#switch').val(0);
+                    $('#rangoUmbral').val(0);
+                    $('#rangoTiempo').val(0);
+                    $('#labelUmbral').html(0);
+                    $('#labelTiempo').html(0);
+                }
+                /*
+                console.log(result);
+                console.log(status);
+                console.log(xhr);
+                */
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr);
+                console.log(status);
+                console.log(error);
+
+                $("#temperature").html("NA");
+                $("#humidity").html("NA");
+                $("#moisture2").html("NA");
+                $("#moisture").attr('aria-valuenow', "0");
+                $('#moisture').css('width', '0%');
+                $('#switch').val(0);
+                $('#rangoUmbral').val(0);
+                $('#rangoTiempo').val(0);
+                $('#labelUmbral').html(0);
+                $('#labelTiempo').html(0);
+            }
+        });
+    }
+
+    function regar() {
+        $.ajax({
+            type: "get",
+            url: window.location.origin + "/watering",
+            data: $("#formRegadera").serialize,
+            success: function(response) {
+                alert("Regando...");
+            },
+            error: function(e) {
+
+            }
+        });
+
+        loadAjax();
+    }
+
+    function guardar() {
+        $.post({
+            url: window.location.origin + "/save",
+            data: $("#formRegadera").serialize(),
+            success: function(response) {
+                alert("Datos actualizados!!");
+            },
+            error: function(e) {
+
+            }
+        });
+        loadAjax();
+    }
+    $(document).ready(function(e) {
+        loadAjax();
+        $("#rangoUmbral").bind("change", function(e) {
+            $("#labelUmbral").html($("#rangoUmbral").val());
+        });
+
+        $("#rangoTiempo").bind("change", function(e) {
+            $("#labelTiempo").html($("#rangoTiempo").val());
+        });
+    });
+</script>
+
+</html>
