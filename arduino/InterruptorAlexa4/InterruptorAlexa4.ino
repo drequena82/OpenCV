@@ -18,9 +18,9 @@ WiFiClient client;
 
 #define API_ENDPOINT "http://sinric.com"
 #define HEARTBEAT_INTERVAL 300000 // 5 Minutes 
-#define NIEVE D1
-#define LUZ D2
+#define LUZ D3
 
+// SINRIC PASS A23dff234zz
 uint64_t heartbeatTimestamp = 0;
 bool isConnected = false;
 
@@ -30,15 +30,6 @@ void turnOn(String deviceId) {
     Serial.print("Turn on device id: ");
     Serial.println(deviceId);
     digitalWrite(LUZ, HIGH);
-  } else if (deviceId == "61b08b30695fce5c87487d5c") // Bola de nieve 
-  {
-    Serial.print("Turn on device id: ");
-    Serial.println(deviceId);
-    digitalWrite(NIEVE, HIGH);
-    digitalWrite(LUZ, HIGH);
-  } else {
-    Serial.print("Turn on for unknown device id: ");
-    Serial.println(deviceId);
   }
 }
 
@@ -48,15 +39,6 @@ void turnOff(String deviceId) {
     Serial.print("Turn off device id: ");
     Serial.println(deviceId);
     digitalWrite(LUZ, LOW);
-  } else if (deviceId == "61b08b30695fce5c87487d5c") // Bola de nieve 
-  {
-    Serial.print("Turn off device id: ");
-    Serial.println(deviceId);
-    digitalWrite(NIEVE, LOW);
-    digitalWrite(LUZ, LOW);
-  } else {
-    Serial.print("Turn off for unknown device id: ");
-    Serial.println(deviceId);
   }
 }
 
@@ -152,9 +134,6 @@ void setup() {
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
   }
-
-  pinMode(NIEVE, OUTPUT);
-  digitalWrite(NIEVE, LOW);
 
   pinMode(LUZ, OUTPUT);
   digitalWrite(LUZ, LOW);
