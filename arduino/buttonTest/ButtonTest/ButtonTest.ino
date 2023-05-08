@@ -23,6 +23,7 @@
 */
 
 #define TIMER 2000 
+#define LED_PIN 3
 
 bool ledOn = false;
 unsigned int counterButton = 0;
@@ -36,6 +37,7 @@ void setup() {
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   delay(1000);
 }
@@ -46,9 +48,11 @@ void loop() {
   isLedOn();
 
   if(ledOn){
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+    digitalWrite(LED_PIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+    digitalWrite(LED_BUILTIN, HIGH);
   }else{
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+    digitalWrite(LED_PIN, LOW);   // turn the LED off by making the voltage LOW
+    digitalWrite(LED_BUILTIN, LOW);
   }
   delay(30);
 }
