@@ -29,15 +29,35 @@ TMRpcm tmrpcm;
 #define RED_PIN 5
 #define GREEN_PIN 6
 #define BLUE_PIN 9
-#define LED_PIN 2
-#define BTN 13
-#define IMU_GND A1
-#define SD_GND A0
+#define LED_PIN 3
+#define BTN A6
 
 int red = 0;
 int green = 0;
 int blue = 0;
 byte color = 1;
+
+
+// ------------------------------ VARIABLES ---------------------------------
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+unsigned long ACC, GYR, COMPL;
+int gyroX, gyroY, gyroZ, accelX, accelY, accelZ, freq, freq_f = 20;
+float k = 0.2;
+unsigned long humTimer = -9000, mpuTimer, nowTimer;
+int stopTimer;
+boolean bzzz_flag, ls_chg_state, ls_state;
+boolean btnState, btn_flag, hold_flag;
+byte btn_counter;
+unsigned long btn_timer, PULSE_timer, swing_timer, swing_timeout, battery_timer, bzzTimer;
+byte nowNumber;
+byte LEDcolor;  // 0 - red, 1 - green, 2 - blue, 3 - pink, 4 - yellow, 5 - ice blue
+byte nowColor, red, green, blue, redOffset, greenOffset, blueOffset;
+boolean eeprom_flag, swing_flag, swing_allow, strike_flag, HUMmode;
+float voltage;
+int PULSEOffset;
+// ------------------------------ VARIABLES ---------------------------------
+
 
 // --------------------------------- SOUNDS ----------------------------------
 const char strike1[] PROGMEM = "SK1.wav";
@@ -150,34 +170,84 @@ void setup(void) {
 }
 
 void loop() {
+  // Detectamos el evento del
+  
+  if(!ls_state){
 
-  if(mpu.getMotionInterruptStatus()) {
-    /* Get new sensor events with the readings */
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-
-    /* Print out the values */
-    Serial.print("AccelX:");
-    Serial.print(a.acceleration.x);
-    Serial.print(",");
-    Serial.print("AccelY:");
-    Serial.print(a.acceleration.y);
-    Serial.print(",");
-    Serial.print("AccelZ:");
-    Serial.print(a.acceleration.z);
-    Serial.print(", ");
-    Serial.print("GyroX:");
-    Serial.print(g.gyro.x);
-    Serial.print(",");
-    Serial.print("GyroY:");
-    Serial.print(g.gyro.y);
-    Serial.print(",");
-    Serial.print("GyroZ:");
-    Serial.print(g.gyro.z);
-    Serial.println("");
   }
+  getFreq();
+  btnTick();
+  swingTick();
+}
 
-  delay(10);
+void randomPULSE() {
+  if (PULSE_ALLOW && ls_state && (millis() - PULSE_timer > PULSE_DELAY)) {
+    PULSE_timer = millis();
+    PULSEOffset = PULSEOffset * k + random(-PULSE_AMPL, PULSE_AMPL) * (1 - k);
+    if (nowColor == 0){ 
+      PULSEOffset = constrain(PULSEOffset, -15, 5);
+    redOffset = constrain(red + PULSEOffset, 0, 255);
+    greenOffset = constrain(green + PULSEOffset, 0, 255);
+    blueOffset = constrain(blue + PULSEOffset, 0, 255);
+    setAll(redOffset, greenOffset, blueOffset);
+  }
+}
+
+void swingTick() {
+  if (GYR > 80 && (millis() - swing_timeout > 100) && HUMmode) {
+    swing_timeout = millis();
+    if (((millis() - swing_timer) > SWING_TIMEOUT) && swing_flag && !strike_flag) {
+      if (GYR >= SWING_THR) {      
+        nowNumber = random(5);          
+        // PROGMEM
+        strcpy_P(BUFFER, (char*)pgm_read_word(&(swings[nowNumber])));
+        tmrpcm.play(BUFFER);               
+        humTimer = millis() - 9000 + swing_time[nowNumber];
+        swing_flag = 0;
+        swing_timer = millis();
+        swing_allow = 0;
+      }
+      if ((GYR > SWING_L_THR) && (GYR < SWING_THR)) {
+        nowNumber = random(5);            
+        // PROGMEM
+        strcpy_P(BUFFER, (char*)pgm_read_word(&(swings_L[nowNumber])));
+        tmrpcm.play(BUFFER);              
+        humTimer = millis() - 9000 + swing_time_L[nowNumber];
+        swing_flag = 0;
+        swing_timer = millis();
+        swing_allow = 0;
+      }
+    }
+  }
+}
+
+void getFreq() {
+  if (ls_state) {                                               
+    if (mpu.getMotionInterruptStatus() && (millis() - mpuTimer > 500)) {                            
+      sensors_event_t a, g, temp;
+      mpu.getEvent(&a, &g, &temp);
+      
+      // find absolute and divide on 100
+      gyroX = abs(a.acceleration.x / 100);
+      gyroY = abs(a.acceleration.y / 100);
+      gyroZ = abs(a.acceleration.z / 100);
+      accelX = abs(g.gyro.x / 100);
+      accelY = abs(g.gyro.y / 100);
+      accelZ = abs(g.gyro.z / 100);
+
+      // vector sum
+      ACC = sq((long)accelX) + sq((long)accelY) + sq((long)accelZ);
+      ACC = sqrt(ACC);
+      GYR = sq((long)gyroX) + sq((long)gyroY) + sq((long)gyroZ);
+      GYR = sqrt((long)GYR);
+      COMPL = ACC + GYR;
+
+      freq = (long)COMPL * COMPL / 1500;                        // parabolic tone change
+      freq = constrain(freq, 18, 300);                          
+      freq_f = freq * k + freq_f * (1 - k);                     // smooth filter
+      mpuTimer = micros();                                     
+    }
+  }
 }
 
 void setColor(byte color) {

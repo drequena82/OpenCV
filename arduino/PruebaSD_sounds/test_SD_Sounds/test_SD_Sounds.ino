@@ -63,6 +63,9 @@ void setup() {
 
   tmrpcm.play("OFF.wav");
 
+  delay(1000);
+  tmrpcm.play("HUM.wav");
+  tmrpcm.loop(true);
   // delete the file:
   //Serial.println("Removing example.txt...");
   //SD.remove("example.txt");
