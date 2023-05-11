@@ -104,6 +104,7 @@ void loop() {
     detectMove();
     digitalWrite(LED_PIN, HIGH);  
     digitalWrite(LED_BUILTIN, HIGH);
+    standBySound();
   }else{
     if(saberOnBefore){
       offFadeSaber();
@@ -111,8 +112,50 @@ void loop() {
     }
     digitalWrite(LED_PIN, LOW);   
     digitalWrite(LED_BUILTIN, LOW);
+    tmrpcm.disable();
   }
   delay(30);
+}
+void standBySound(){
+  //if(!tmrpcm.isPlaying()){
+    //tmrpcm.play("HUM.wav");
+  //}
+}
+
+void isLedOn(){
+  unsigned int buttonPress = analogRead(A6);
+  
+  float voltage = buttonPress * (5.0 / 1023.0);
+  // > y < (mayor y menor)
+  // Mantener pulsado el botón para realizar acciones
+  if(voltage > 3){
+    if (counterButton == 0){
+      counterButton = millis();    
+    }else if(millis() >= counterButton + TIMER){
+      println("PULSACION LARGA");
+      flashLed();
+      counterButton = 0;
+      ledOn = !ledOn;
+    }/*else if(ledOn && millis() >= counterButton + 200){
+      println("PULSACION CORTA");
+      color = color + 1;
+      // Tenemos 6 colores
+      color = color % 6;
+      onFadeSaber();
+      counterButton = 0;
+    }*/
+  }else{
+    counterButton = 0;
+  }
+}
+
+void flashLed(){
+  for(unsigned int i = 0; i < 4 ; i ++){
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(100);
+  }
 }
 
 void detectMove(){
@@ -133,46 +176,34 @@ void detectMove(){
       println(g.gyro.y);
       print("gyro z: ");
       print(g.gyro.z);
+      println("");
 
       //Recogemos los valores y decidimos los audios que se van a ejecutar.
+      if(!tmrpcm.isPlaying()){
+        int swingNum = random(1,5);
+        switch(swingNum){
+          case 1:
+            tmrpcm.play("SWS1.wav");
+            break;
+          case 2:
+            tmrpcm.play("SWS2.wav");
+            break;
+          case 3:
+            tmrpcm.play("SWS3.wav");
+            break;
+          case 4:
+            tmrpcm.play("SWS4.wav");
+            break;
+          case 5:
+            tmrpcm.play("SWS5.wav");
+            break;
+          default:
+            tmrpcm.play("SWS1.wav");
+            break;
+        }
+      }
   }
 }
-
-void isLedOn(){
-  unsigned int buttonPress = analogRead(A6);
-  
-  float voltage = buttonPress * (5.0 / 1023.0);
-  // > y < (mayor y menor)
-  // Mantener pulsado el botón para realizar acciones
-  if(voltage > 3){
-      println("BOTON ACTIVO");
-    if (counterButton == 0){
-      counterButton = millis();    
-    }else if(millis() >= counterButton + TIMER){
-      println("PULSACION LARGA");
-      flashLed();
-      counterButton = 0;
-      ledOn = !ledOn;
-    }else if(ledOn && millis() >= counterButton + 500){
-      color = color + 1;
-      // Tenemos 6 colores
-      color = color % 6;
-      onFadeSaber();
-    }
-  }else{
-    counterButton = 0;
-  }
-}
-
-void flashLed(){
-  for(unsigned int i = 0; i < 4 ; i ++){
-    digitalWrite(LED_BUILTIN,HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN,LOW);
-    delay(100);
-  }
-}
-
 
 void setColor() {
   switch (color) {
@@ -210,12 +241,6 @@ void setColor() {
   }
 }
 
-void offLed(){
-  analogWrite(RED_PIN, 0);
-  analogWrite(GREEN_PIN, 0);
-  analogWrite(BLUE_PIN, 0);
-}
-
 void onFadeSaber(){
   // asignamos los colores
   setColor();
@@ -223,9 +248,6 @@ void onFadeSaber(){
   //Sonidos al arrancar
   tmrpcm.disable();
   tmrpcm.play("ON.wav");
-  delay(2000);
-  tmrpcm.loop(1);
-  tmrpcm.play("HUM.wav");
 
   // fade in from min to max in increments of 5 points:
   for (int fadeR = 0, fadeG = 0, fadeB = 0; fadeR <= red || fadeG <= green || fadeB <= blue; fadeR += 5, fadeG += 5, fadeB += 5) {
@@ -249,11 +271,7 @@ void onFadeSaber(){
 void offFadeSaber(){
 
   // Sonidos al apagar.
-  tmrpcm.loop(0);
-  delay(500);
   tmrpcm.play("OFF.wav");
-  delay(2000);
-  tmrpcm.disable();
 
   // fade in from min to max in increments of 5 points:
   for (int fadeR = red, fadeG = green, fadeB = blue; fadeR >= 0 || fadeG >= 0 || fadeB >= 0; fadeR -= 5, fadeG -= 5, fadeB -= 5) {
