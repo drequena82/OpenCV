@@ -38,7 +38,7 @@
 int red = 0;
 int green = 0;
 int blue = 0;
-byte color = 0;
+byte color = 2;
 
 Adafruit_MPU6050 mpu;
 TMRpcm tmrpcm;
@@ -54,7 +54,7 @@ void setup() {
   }
 
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  //pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
 
    if (!SD.begin(4)) {
@@ -101,25 +101,27 @@ void loop() {
       onFadeSaber();
       saberOnBefore = true;
     }
+    standBySound();
     detectMove();
     digitalWrite(LED_PIN, HIGH);  
-    digitalWrite(LED_BUILTIN, HIGH);
-    standBySound();
+    //digitalWrite(LED_BUILTIN, HIGH);
   }else{
     if(saberOnBefore){
       offFadeSaber();
       saberOnBefore = false;
     }
     digitalWrite(LED_PIN, LOW);   
-    digitalWrite(LED_BUILTIN, LOW);
+    //digitalWrite(LED_BUILTIN, LOW);
     tmrpcm.disable();
   }
   delay(30);
 }
+
 void standBySound(){
-  //if(!tmrpcm.isPlaying()){
-    //tmrpcm.play("HUM.wav");
-  //}
+  if(tmrpcm.isPlaying() == 0){
+    tmrpcm.disable();
+    playSound("HUM.wav");
+  }
 }
 
 void isLedOn(){
@@ -131,19 +133,20 @@ void isLedOn(){
   if(voltage > 3){
     if (counterButton == 0){
       counterButton = millis();    
+      println("PULSACION");
+      //if(ledOn){
+        //println("PULSACION CORTA");
+        //color = color + 1;
+        // Tenemos 6 colores
+        //color = color % 6;
+        //changeColor();
+      //}
     }else if(millis() >= counterButton + TIMER){
       println("PULSACION LARGA");
       flashLed();
       counterButton = 0;
       ledOn = !ledOn;
-    }/*else if(ledOn && millis() >= counterButton + 200){
-      println("PULSACION CORTA");
-      color = color + 1;
-      // Tenemos 6 colores
-      color = color % 6;
-      onFadeSaber();
-      counterButton = 0;
-    }*/
+    }
   }else{
     counterButton = 0;
   }
@@ -156,6 +159,13 @@ void flashLed(){
     digitalWrite(LED_BUILTIN,LOW);
     delay(100);
   }
+}
+
+void changeColor(){
+  setColor();
+  analogWrite(RED_PIN, red);
+  analogWrite(GREEN_PIN, green);
+  analogWrite(BLUE_PIN, blue);  
 }
 
 void detectMove(){
@@ -183,25 +193,31 @@ void detectMove(){
         int swingNum = random(1,5);
         switch(swingNum){
           case 1:
-            tmrpcm.play("SWS1.wav");
+            playSound("SWS1.wav");
             break;
           case 2:
-            tmrpcm.play("SWS2.wav");
+            playSound("SWS2.wav");
             break;
           case 3:
-            tmrpcm.play("SWS3.wav");
+            playSound("SWS3.wav");
             break;
           case 4:
-            tmrpcm.play("SWS4.wav");
+            playSound("SWS4.wav");
             break;
           case 5:
-            tmrpcm.play("SWS5.wav");
+            playSound("SWS5.wav");
             break;
           default:
-            tmrpcm.play("SWS1.wav");
+            playSound("SWS1.wav");
             break;
         }
       }
+  }
+}
+void playSound(char* sound){
+  if(tmrpcm.isPlaying() == 0){
+    tmrpcm.disable();
+    tmrpcm.play(sound);
   }
 }
 
@@ -246,8 +262,7 @@ void onFadeSaber(){
   setColor();
 
   //Sonidos al arrancar
-  tmrpcm.disable();
-  tmrpcm.play("ON.wav");
+  playSound("ON.wav");
 
   // fade in from min to max in increments of 5 points:
   for (int fadeR = 0, fadeG = 0, fadeB = 0; fadeR <= red || fadeG <= green || fadeB <= blue; fadeR += 5, fadeG += 5, fadeB += 5) {
@@ -271,7 +286,7 @@ void onFadeSaber(){
 void offFadeSaber(){
 
   // Sonidos al apagar.
-  tmrpcm.play("OFF.wav");
+  playSound("OFF.wav");
 
   // fade in from min to max in increments of 5 points:
   for (int fadeR = red, fadeG = green, fadeB = blue; fadeR >= 0 || fadeG >= 0 || fadeB >= 0; fadeR -= 5, fadeG -= 5, fadeB -= 5) {
@@ -293,18 +308,23 @@ void offFadeSaber(){
 }
 
 void clashSaber(){
+  playSound("SK8.wav");
+
   analogWrite(RED_PIN, 255);
   analogWrite(GREEN_PIN, 255);
   analogWrite(BLUE_PIN, 255);
   delay(100);
+  
   analogWrite(RED_PIN, red);
   analogWrite(GREEN_PIN, green);
   analogWrite(BLUE_PIN, blue);
   delay(100);
+  
   analogWrite(RED_PIN, 255);
   analogWrite(GREEN_PIN, 255);
   analogWrite(BLUE_PIN, 255);
   delay(100);
+  
   analogWrite(RED_PIN, red);
   analogWrite(GREEN_PIN, green);
   analogWrite(BLUE_PIN, blue);
