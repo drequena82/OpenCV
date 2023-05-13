@@ -78,7 +78,7 @@ void setup() {
   //setupt motion detection
   mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
   mpu.setMotionDetectionThreshold(1);
-  mpu.setMotionDetectionDuration(20);
+  mpu.setMotionDetectionDuration(100);
   mpu.setInterruptPinLatch(true);	// Keep it latched.  Will turn off when reinitialized.
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
@@ -118,10 +118,7 @@ void loop() {
 }
 
 void standBySound(){
-  if(tmrpcm.isPlaying() == 0){
-    tmrpcm.disable();
-    playSound("HUM.wav");
-  }
+  //playSound("HUM2.wav");
 }
 
 void isLedOn(){
@@ -131,16 +128,18 @@ void isLedOn(){
   // > y < (mayor y menor)
   // Mantener pulsado el botón para realizar acciones
   if(voltage > 3){
+    println("PULSADO!!!: ");
+    print(counterButton);
+    println("");
     if (counterButton == 0){
       counterButton = millis();    
-      println("PULSACION");
-      //if(ledOn){
-        //println("PULSACION CORTA");
-        //color = color + 1;
+      if(ledOn){
+        println("PULSACION CORTA");
+        color = color + 1;
         // Tenemos 6 colores
-        //color = color % 6;
-        //changeColor();
-      //}
+        color = color % 6;
+        changeColor();
+      }
     }else if(millis() >= counterButton + TIMER){
       println("PULSACION LARGA");
       flashLed();
@@ -150,6 +149,7 @@ void isLedOn(){
   }else{
     counterButton = 0;
   }
+  delay(100);
 }
 
 void flashLed(){
@@ -172,7 +172,7 @@ void detectMove(){
   if (mpu.getMotionInterruptStatus()) {                            
       sensors_event_t a, g, temp;
       mpu.getEvent(&a, &g, &temp);
-      
+      /*
       print("accel x: ");
       println(a.acceleration.x);
       print("accel y: ");
@@ -187,9 +187,10 @@ void detectMove(){
       print("gyro z: ");
       print(g.gyro.z);
       println("");
-
+      */
       //Recogemos los valores y decidimos los audios que se van a ejecutar.
-      if(!tmrpcm.isPlaying()){
+      tmrpcm.disable();
+      if(tmrpcm.isPlaying() == 0){
         int swingNum = random(1,5);
         switch(swingNum){
           case 1:
@@ -211,13 +212,19 @@ void detectMove(){
             playSound("SWS1.wav");
             break;
         }
+        delay(300);
       }
+  }else{
+    tmrpcm.disable();
   }
 }
 void playSound(char* sound){
   if(tmrpcm.isPlaying() == 0){
+    println(sound);
     tmrpcm.disable();
     tmrpcm.play(sound);
+  }else{
+    println("Sound is playing!");
   }
 }
 
@@ -262,6 +269,7 @@ void onFadeSaber(){
   setColor();
 
   //Sonidos al arrancar
+  tmrpcm.disable();
   playSound("ON.wav");
 
   // fade in from min to max in increments of 5 points:
@@ -281,13 +289,13 @@ void onFadeSaber(){
     // wait for 30 milliseconds to see the dimming effect
     delay(30);
   }
+  tmrpcm.disable();
 }
 
 void offFadeSaber(){
 
   // Sonidos al apagar.
   playSound("OFF.wav");
-
   // fade in from min to max in increments of 5 points:
   for (int fadeR = red, fadeG = green, fadeB = blue; fadeR >= 0 || fadeG >= 0 || fadeB >= 0; fadeR -= 5, fadeG -= 5, fadeB -= 5) {
     // sets the value (range from 0 to 255):
@@ -305,10 +313,11 @@ void offFadeSaber(){
     // wait for 30 milliseconds to see the dimming effect
     delay(30);
   }
+  tmrpcm.disable();
 }
 
 void clashSaber(){
-  playSound("SK8.wav");
+  playSound("CLASH.wav");
 
   analogWrite(RED_PIN, 255);
   analogWrite(GREEN_PIN, 255);
